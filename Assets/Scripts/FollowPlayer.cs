@@ -32,7 +32,7 @@ public class FollowPlayer : MonoBehaviour
             {
                 thirdPersonOffset.y = 2f;
             }
-            thirdPersonOffset.y = thirdPersonOffset.y - Input.GetAxis("Mouse ScrollWheel");
+            thirdPersonOffset.y = thirdPersonOffset.y - Input.GetAxis("Mouse ScrollWheel") * 2;
         }
 
         if (!cameraChanged)

@@ -6,14 +6,16 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Player")]
+    [SerializeField] GameObject player;
+    private Rigidbody rb;
+    [SerializeField] private Animator animator;
+
     [Header("Input")]
     [SerializeField] float speed = 2.5f;
     private float horizontalInput;
     private float forwardInput;
     private Vector3 moveDirection;
-
-    [SerializeField] GameObject player;
-    private Rigidbody rb;
 
     [Header("MousePosition")]
     public Vector3 screenPosition;
@@ -34,6 +36,7 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        animator = GetComponent<Animator>();
         rb = player.GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         groundLayer = LayerMask.GetMask("Ground");
@@ -96,27 +99,41 @@ public class PlayerController : MonoBehaviour
     private void MovePlayer()
     {
         moveDirection = new Vector3(horizontalInput, 0.0f, forwardInput);
+        Vector3 normalizedDirection = Vector3.Normalize(moveDirection);
+
+        if (normalizedDirection != Vector3.zero)
+        {
+            rb.MoveRotation(Quaternion.LookRotation(normalizedDirection));
+            animator.SetFloat("Speed_f", 1);
+        }
+        else
+        {
+            animator.SetFloat("Speed_f", 0);
+        }
 
         if (isGrounded)
         {
-            rb.AddRelativeForce(moveDirection.normalized * speed, ForceMode.Force);
+            rb.AddForce(normalizedDirection * speed, ForceMode.Force);
         }
         else if (!isGrounded)
         {
-            rb.AddRelativeForce(moveDirection.normalized * speed * airMultiplier, ForceMode.Force);
+            rb.AddForce(normalizedDirection * speed * airMultiplier, ForceMode.Force);
         }
+
+        
     }
 
     private void Jump()
     {
         rb.velocity = new Vector3(rb.velocity.x, 0.0f, rb.velocity.z);
-
         rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+        animator.SetTrigger("Jump_trig");
     }
 
     private void AllowJump()
     {
         canJump = true;
+        animator.ResetTrigger("Jump_trig");
     }
 
     private void SpeedLimit()
